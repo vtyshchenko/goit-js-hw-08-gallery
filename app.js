@@ -68,43 +68,85 @@ const ulListRef = document.querySelector(".js-gallery");
 const modelWindowRef = document.querySelector(".js-lightbox");
 const menuBtnRef = document.querySelector(".lightbox__button");
 const imageRef = document.querySelector(".lightbox__image");
+const overlayRef = document.querySelector(".lightbox__overlay");
+let number = 0;
 
-// const imagesRef = document.querySelector(".lightbox__content");
-ulListRef.classList.add("list");
-
-// Создание и рендер разметки по массиву данных galleryItems из app.js
-// и предоставленному шаблону.
+// Создание и рендер разметки по массиву данных galleryItems из app.js и предоставленному шаблону.
 let s = ``;
 for (const image of galleryItems) {
-  // s += `<li class="gallery__item"><a class="gallery__link" href="${image["original"]}" > <img class="gallery__image" src="${image["preview"]}" data-source="${image["original"]}" alt="${image["description"]}"/></a></li>`;
-  s += `<li class="gallery__item"><img class="gallery__image" src="${image["preview"]}" data-source="${image["original"]}" alt="${image["description"]}"/></li>`;
+  s += `<li class="gallery__item"><a class="gallery__link" href="${image["original"]}" > <img class="gallery__image" src="${image["preview"]}" data-source="${image["original"]}" alt="${image["description"]}"/></a></li>`;
 }
 ulListRef.insertAdjacentHTML("beforeend", s);
 
-// Реализация делегирования на галерее ul.js-gallery и получение url
-// большого изображения.
-
+// Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
+window.addEventListener("keyup", onKeyPress);
 ulListRef.addEventListener("click", onClickPicture);
+overlayRef.addEventListener("click", onClickOverlay);
 menuBtnRef.addEventListener("click", onClickButtonClose);
 
-function onClickPicture(params) {
-  // Открытие модального окна по клику на элементе галереи.
-  // Подмена значения атрибута src элемента img.lightbox__image.
-  imageRef.setAttribute("src", params.target.attributes["data-source"].value);
-  imageRef.setAttribute("alt", params.target.alt);
-
-  modelWindowRef.classList.add("is-open");
+function closeModalForm() {
+  // Закрытие модального окна по клику на кнопку button[data-action= "close-lightbox"].
+  modelWindowRef.classList.remove("is-open");
+  // Очистка значения атрибута src элемента img.lightbox__image.
+  // Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.
+  imageRef.setAttribute("src", "");
+  imageRef.setAttribute("alt", "");
 }
 
-function onClickButtonClose(params) {
-  if (menuBtnRef.dataset.action === "close-lightbox") {
-    // Закрытие модального окна по клику на кнопку
-    // button[data-action= "close-lightbox"].
-    modelWindowRef.classList.toggle("is-open");
-    // Очистка значения атрибута src элемента img.lightbox__image.
-    // Это необходимо для того, чтобы при следующем открытии модального окна,
-    // пока грузится изображение, мы не видели предыдущее.
-    imageRef.setAttribute("src", "");
-    imageRef.setAttribute("alt", "");
+function getPicture(delta) {
+  if (delta > 0 && number == galleryItems.length - 1) {
+    number = 0;
+  } else if (delta < 0 && number == 0) {
+    number = galleryItems.length - 1;
+  } else {
+    number += delta;
+  }
+  imageRef.setAttribute("src", galleryItems[number].original);
+  imageRef.setAttribute("alt", galleryItems[number].description);
+}
+
+// Открытие модального окна по клику на элементе галереи. Подмена значения атрибута src элемента img.lightbox__image.
+function onClickPicture(event) {
+  event.preventDefault();
+  if (event.target.nodeName === "IMG") {
+    imageRef.setAttribute("src", event.target.attributes["data-source"].value);
+    imageRef.setAttribute("alt", event.target.alt);
+
+    modelWindowRef.classList.add("is-open");
+    for (const imageObj of galleryItems) {
+      if (imageObj.preview === event.target.src) {
+        number = galleryItems.indexOf(imageObj);
+      }
+    }
+  }
+}
+
+function onClickButtonClose(event) {
+  if (event.target.dataset.action === "close-lightbox") {
+    closeModalForm();
+  }
+}
+
+// Закрытие модального окна по клику на div.lightbox__overlay.
+function onClickOverlay() {
+  closeModalForm();
+}
+
+function onKeyPress(event) {
+  switch (event.key) {
+    // Закрытие модального окна по нажатию клавиши ESC.
+    case "Esc":
+    case "Escape":
+      closeModalForm();
+      break;
+    // Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
+    case "Left":
+    case "ArrowLeft":
+      getPicture(-1);
+      break;
+    case "Right":
+    case "ArrowRight":
+      getPicture(1);
+      break;
   }
 }

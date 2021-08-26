@@ -92,13 +92,17 @@ function createUlMarkup(imagesList) {
     .join("");
 }
 
+function setImageAttr(src, alt) {
+  imageRef.setAttribute("src", src);
+  imageRef.setAttribute("alt", alt);
+}
+
 function closeModalForm() {
   // Закрытие модального окна по клику на кнопку button[data-action= "close-lightbox"].
   modelWindowRef.classList.remove("is-open");
   // Очистка значения атрибута src элемента img.lightbox__image.
   // Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.
-  imageRef.setAttribute("src", "");
-  imageRef.setAttribute("alt", "");
+  setImageAttr("", "");
   window.removeEventListener("keyup", onKeyPress);
 }
 
@@ -111,8 +115,7 @@ function getPicture(delta) {
   } else {
     number += delta;
   }
-  imageRef.setAttribute("src", galleryItems[number].original);
-  imageRef.setAttribute("alt", galleryItems[number].description);
+  setImageAttr(galleryItems[number].original, galleryItems[number].description);
 }
 
 function getImageIndex(imageLink) {
@@ -127,8 +130,10 @@ function getImageIndex(imageLink) {
 function onClickPicture(event) {
   event.preventDefault();
   if (event.target.nodeName === "IMG") {
-    imageRef.setAttribute("src", event.target.attributes["data-source"].value);
-    imageRef.setAttribute("alt", event.target.alt);
+    setImageAttr(
+      event.target.attributes["data-source"].value,
+      event.target.alt
+    );
 
     modelWindowRef.classList.add("is-open");
     getImageIndex(event.target.src);

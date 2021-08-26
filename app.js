@@ -75,8 +75,6 @@ let number = 0;
 const imagesGallery = createUlMarkup(galleryItems);
 galeryListRef.insertAdjacentHTML("beforeend", imagesGallery);
 
-// Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
-window.addEventListener("keyup", onKeyPress);
 galeryListRef.addEventListener("click", onClickPicture);
 overlayRef.addEventListener("click", onClickOverlay);
 menuBtnRef.addEventListener("click", onClickButtonClose);
@@ -101,8 +99,10 @@ function closeModalForm() {
   // Это необходимо для того, чтобы при следующем открытии модального окна, пока грузится изображение, мы не видели предыдущее.
   imageRef.setAttribute("src", "");
   imageRef.setAttribute("alt", "");
+  window.removeEventListener("keyup", onKeyPress);
 }
 
+// Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
 function getPicture(delta) {
   if (delta > 0 && number == galleryItems.length - 1) {
     number = 0;
@@ -132,6 +132,7 @@ function onClickPicture(event) {
 
     modelWindowRef.classList.add("is-open");
     getImageIndex(event.target.src);
+    window.addEventListener("keyup", onKeyPress);
   }
 }
 

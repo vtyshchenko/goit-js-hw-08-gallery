@@ -64,7 +64,7 @@ const galleryItems = [
   },
 ];
 
-const ulListRef = document.querySelector(".js-gallery");
+const galeryListRef = document.querySelector(".js-gallery");
 const modelWindowRef = document.querySelector(".js-lightbox");
 const menuBtnRef = document.querySelector(".lightbox__button");
 const imageRef = document.querySelector(".lightbox__image");
@@ -72,17 +72,27 @@ const overlayRef = document.querySelector(".lightbox__overlay");
 let number = 0;
 
 // Создание и рендер разметки по массиву данных galleryItems из app.js и предоставленному шаблону.
-let s = ``;
-for (const image of galleryItems) {
-  s += `<li class="gallery__item"><a class="gallery__link" href="${image["original"]}" > <img class="gallery__image" src="${image["preview"]}" data-source="${image["original"]}" alt="${image["description"]}"/></a></li>`;
-}
-ulListRef.insertAdjacentHTML("beforeend", s);
+const imagesGallery = createUlMarkup(galleryItems);
+galeryListRef.insertAdjacentHTML("beforeend", imagesGallery);
 
 // Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
 window.addEventListener("keyup", onKeyPress);
-ulListRef.addEventListener("click", onClickPicture);
+galeryListRef.addEventListener("click", onClickPicture);
 overlayRef.addEventListener("click", onClickOverlay);
 menuBtnRef.addEventListener("click", onClickButtonClose);
+
+function createUlMarkup(imagesList) {
+  return imagesList
+    .map(({ preview, original, description }) => {
+      return `
+    <li class="gallery__item">
+      <a class="gallery__link" href="${original}" > 
+        <img class="gallery__image" src="${preview}" data-source="${original}" alt="${description}"/>
+      </a>
+    </li>`;
+    })
+    .join("");
+}
 
 function closeModalForm() {
   // Закрытие модального окна по клику на кнопку button[data-action= "close-lightbox"].
@@ -105,6 +115,14 @@ function getPicture(delta) {
   imageRef.setAttribute("alt", galleryItems[number].description);
 }
 
+function getImageIndex(imageLink) {
+  for (const imageObj of galleryItems) {
+    if (imageObj.preview === imageLink) {
+      number = galleryItems.indexOf(imageObj);
+    }
+  }
+}
+
 // Открытие модального окна по клику на элементе галереи. Подмена значения атрибута src элемента img.lightbox__image.
 function onClickPicture(event) {
   event.preventDefault();
@@ -113,11 +131,7 @@ function onClickPicture(event) {
     imageRef.setAttribute("alt", event.target.alt);
 
     modelWindowRef.classList.add("is-open");
-    for (const imageObj of galleryItems) {
-      if (imageObj.preview === event.target.src) {
-        number = galleryItems.indexOf(imageObj);
-      }
-    }
+    getImageIndex(event.target.src);
   }
 }
 

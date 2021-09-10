@@ -72,14 +72,14 @@ const overlayRef = document.querySelector(".lightbox__overlay");
 let number = 0;
 
 // Создание и рендер разметки по массиву данных galleryItems из app.js и предоставленному шаблону.
-const imagesGallery = createUlMarkup(galleryItems);
+const imagesGallery = createGalleryMarkup(galleryItems);
 galeryListRef.insertAdjacentHTML("beforeend", imagesGallery);
 
-galeryListRef.addEventListener("click", onClickPicture);
+galeryListRef.addEventListener("click", onClickImage);
 overlayRef.addEventListener("click", onClickOverlay);
 menuBtnRef.addEventListener("click", onClickButtonClose);
 
-function createUlMarkup(imagesList) {
+function createGalleryMarkup(imagesList) {
   return imagesList
     .map(({ preview, original, description }) => {
       return `
@@ -107,7 +107,7 @@ function closeModalForm() {
 }
 
 // Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
-function getPictureForView(idxImage, delta) {
+function getImageForView(idxImage, delta) {
   let res = idxImage + delta;
   if (delta > 0 && idxImage == galleryItems.length - 1) {
     res = 0;
@@ -127,7 +127,7 @@ function getImageIndex(imageLink) {
 }
 
 // Открытие модального окна по клику на элементе галереи. Подмена значения атрибута src элемента img.lightbox__image.
-function onClickPicture(event) {
+function onClickImage(event) {
   event.preventDefault();
   if (event.target.nodeName === "IMG") {
     setImageAttr(
@@ -162,11 +162,11 @@ function onKeyPress(event) {
     // Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
     case "Left":
     case "ArrowLeft":
-      number = getPictureForView(number, -1);
+      number = getImageForView(number, -1);
       break;
     case "Right":
     case "ArrowRight":
-      number = getPictureForView(number, 1);
+      number = getImageForView(number, 1);
       break;
   }
 }

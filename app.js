@@ -107,23 +107,23 @@ function closeModalForm() {
 }
 
 // Реализация делегирования на галерее ul.js-gallery и получение url большого изображения.
-function getPicture(delta) {
-  if (delta > 0 && number == galleryItems.length - 1) {
-    number = 0;
-  } else if (delta < 0 && number == 0) {
-    number = galleryItems.length - 1;
+function getPictureForView(idxImage, delta) {
+  let res = idxImage + delta;
+  if (delta > 0 && idxImage == galleryItems.length - 1) {
+    res = 0;
   } else {
-    number += delta;
+    if (delta < 0 && idxImage == 0) {
+      res = galleryItems.length - 1;
+    }
   }
-  setImageAttr(galleryItems[number].original, galleryItems[number].description);
+  setImageAttr(galleryItems[res].original, galleryItems[res].description);
+  return res;
 }
 
 function getImageIndex(imageLink) {
-  for (const imageObj of galleryItems) {
-    if (imageObj.preview === imageLink) {
-      number = galleryItems.indexOf(imageObj);
-    }
-  }
+  return galleryItems.indexOf(
+    galleryItems.find((imageObj) => imageObj.preview === imageLink)
+  );
 }
 
 // Открытие модального окна по клику на элементе галереи. Подмена значения атрибута src элемента img.lightbox__image.
@@ -136,7 +136,7 @@ function onClickPicture(event) {
     );
 
     modelWindowRef.classList.add("is-open");
-    getImageIndex(event.target.src);
+    number = getImageIndex(event.target.src);
     window.addEventListener("keyup", onKeyPress);
   }
 }
@@ -162,11 +162,11 @@ function onKeyPress(event) {
     // Пролистывание изображений галереи в открытом модальном окне клавишами "влево" и "вправо".
     case "Left":
     case "ArrowLeft":
-      getPicture(-1);
+      number = getPictureForView(number, -1);
       break;
     case "Right":
     case "ArrowRight":
-      getPicture(1);
+      number = getPictureForView(number, 1);
       break;
   }
 }
